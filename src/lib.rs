@@ -14,7 +14,7 @@
 //!     },
 //!     ..Default::default()
 //! };
-// ```
+//! ```
 use std::collections::HashMap;
 use serde;
 use serde::{Serialize, Deserialize};
