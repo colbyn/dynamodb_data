@@ -1,20 +1,20 @@
 #![allow(unused)]
-///! Subject to DynamoDB’s limitations.
-///! 
-///! Example:
-///! ```
-///! let payload: HashMap<String, AttributeValue> = fields!{
-///!     id: Uuid::new_v4(),
-///!     name: "user name",
-///!     counter: 0,
-///! };
-///! let get_item_query = GetItemInput {
-///!     key: fields!{
-///!         id: Uuid::new_v4()
-///!     },
-///!     ..Default::default()
-///! }
-///! ```
+//! DynamoDB Data Utilities
+//! 
+//! API Example:
+//! ```
+//! let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
+//!     id: Uuid::new_v4(),
+//!     name: "user name",
+//!     counter: 0
+//! };
+//! let get_item_query = GetItemInput {
+//!     key: fields!{
+//!         id: Uuid::new_v4()
+//!     },
+//!     ..Default::default()
+//! };
+// ```
 use std::collections::HashMap;
 use serde;
 use serde::{Serialize, Deserialize};
@@ -35,6 +35,9 @@ use rusoto_dynamodb::{
 ///////////////////////////////////////////////////////////////////////////////
 
 /// Converts any serializable value to a `rusoto_dynamodb::AttributeValue`.
+/// ```
+/// let msg: rusoto_dynamodb::AttributeValue = to_attribute_value("Hello World")?;
+/// ```
 pub fn to_attribute_value<A: Serialize>(value: A) -> Result<AttributeValue, serde_json::Error> {
     match serde_json::to_value(value) {
         Ok(x) => Ok(json_to_attribute_value(x)),
@@ -43,12 +46,21 @@ pub fn to_attribute_value<A: Serialize>(value: A) -> Result<AttributeValue, serd
 }
 
 /// Converts any serializable value from a `rusoto_dynamodb::AttributeValue`.
+/// ```
+/// let msg: rusoto_dynamodb::AttributeValue = dynamodb_data::to_attribute_value("Hello World")?;
+/// let msg: String = from_attribute_value(msg)?;
+/// ```
 pub fn from_attribute_value<A: serde::de::DeserializeOwned>(value: AttributeValue) -> Result<A, serde_json::Error> {
     let value: Value = attribute_value_to_json(value);
     serde_json::from_value(value)
 }
 
 /// Must be something that serializes to a JSON Object.
+/// ```
+/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(some_hashmap_macro!{
+///     "msg" => "Hello World",
+/// })?;
+/// ```
 pub fn to_fields<A: Serialize>(value: A) -> Result<HashMap<String, AttributeValue>, serde_json::Error> {
     match serde_json::to_value(value) {
         Ok(x) => Ok(json_to_attribute_value_hashmap(x)),
@@ -57,6 +69,12 @@ pub fn to_fields<A: Serialize>(value: A) -> Result<HashMap<String, AttributeValu
 }
 
 /// Must be something that serializes from a JSON Object.
+/// ```
+/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(some_hashmap_macro!{
+///     "msg" => "Hello World",
+/// })?;
+/// let msg: HashMap<String, String> = from_fields(msg)?;
+/// ```
 pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, AttributeValue>) -> Result<A, serde_json::Error> {
     let value: serde_json::Map<String, Value> = attribute_value_hashmap_to_json_map(value);
     serde_json::from_value(Value::Object(value))
@@ -73,7 +91,7 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 /// 
 /// Example 1:
 /// ```
-/// let payload: HashMap<String, AttributeValue> = fields!{
+/// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
 ///     id: Uuid::new_v4(),
 ///     name: "user name",
 ///     counter: 0,
@@ -87,7 +105,7 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 ///         id: Uuid::new_v4()
 ///     },
 ///     ..Default::default()
-/// }
+/// };
 /// ```
 #[macro_export]
 macro_rules! fields {
@@ -118,7 +136,7 @@ macro_rules! fields {
 ///         "#id" => "id"
 ///     },
 ///     ..Default::default()
-/// }
+/// };
 /// ```
 #[macro_export]
 macro_rules! names {

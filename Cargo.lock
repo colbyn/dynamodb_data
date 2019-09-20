@@ -238,7 +238,7 @@ dependencies = [
 
 [[package]]
 name = "dynamodb_data"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "rusoto_core 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusoto_dynamodb 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
