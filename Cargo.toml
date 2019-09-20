@@ -1,0 +1,16 @@
+[package]
+name = "dynamodb_data"
+version = "0.1.0"
+authors = ["colbyn <hello@colbyn.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+either = "1.5.2"
+serde = {version = "1.0.99", features = ["derive"]}
+serde_json = "1.0.40"
+rusoto_core = "0.40.0"
+rusoto_dynamodb = "0.40.0"
+futures = "0.1.29"
+
