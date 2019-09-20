@@ -1,6 +1,6 @@
 [package]
 name = "dynamodb_data"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["colbyn <hello@colbyn.com>"]
 edition = "2018"
 license = "MIT"
