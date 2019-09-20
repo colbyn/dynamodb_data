@@ -3,14 +3,17 @@
 //! 
 //! API Example:
 //! ```
+//! use dynamodb_data::*;
+//! use std::collections::HashMap;
+//! 
 //! let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-//!     id: Uuid::new_v4(),
+//!     id: ::uuid::Uuid::new_v4(),
 //!     name: "user name",
 //!     counter: 0
 //! };
-//! let get_item_query = GetItemInput {
+//! let get_item_query = rusoto_dynamodb::GetItemInput {
 //!     key: fields!{
-//!         id: Uuid::new_v4()
+//!         id: ::uuid::Uuid::new_v4()
 //!     },
 //!     ..Default::default()
 //! };
@@ -36,7 +39,8 @@ use rusoto_dynamodb::{
 
 /// Converts any serializable value to a `rusoto_dynamodb::AttributeValue`.
 /// ```
-/// let msg: rusoto_dynamodb::AttributeValue = to_attribute_value("Hello World")?;
+/// let msg: rusoto_dynamodb::AttributeValue = dynamodb_data::to_attribute_value("Hello World")
+///     .expect("serde issue");
 /// ```
 pub fn to_attribute_value<A: Serialize>(value: A) -> Result<AttributeValue, serde_json::Error> {
     match serde_json::to_value(value) {
@@ -47,8 +51,8 @@ pub fn to_attribute_value<A: Serialize>(value: A) -> Result<AttributeValue, serd
 
 /// Converts any serializable value from a `rusoto_dynamodb::AttributeValue`.
 /// ```
-/// let msg: rusoto_dynamodb::AttributeValue = dynamodb_data::to_attribute_value("Hello World")?;
-/// let msg: String = from_attribute_value(msg)?;
+/// let msg: rusoto_dynamodb::AttributeValue = dynamodb_data::to_attribute_value("Hello World").expect("serde issue");
+/// let msg: String = dynamodb_data::from_attribute_value(msg).expect("serde issue");
 /// ```
 pub fn from_attribute_value<A: serde::de::DeserializeOwned>(value: AttributeValue) -> Result<A, serde_json::Error> {
     let value: Value = attribute_value_to_json(value);
@@ -57,9 +61,14 @@ pub fn from_attribute_value<A: serde::de::DeserializeOwned>(value: AttributeValu
 
 /// Must be something that serializes to a JSON Object.
 /// ```
-/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(some_hashmap_macro!{
-///     "msg" => "Hello World",
-/// })?;
+/// use std::collections::HashMap;
+/// use std::iter::FromIterator;
+/// let mut object: HashMap<String, u32> = HashMap::from_iter(vec![
+///     (String::from("red"), 1),
+///     (String::from("green"), 2),
+///     (String::from("blue"), 3)
+/// ]);
+/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(object).expect("to_fields issue");
 /// ```
 pub fn to_fields<A: Serialize>(value: A) -> Result<HashMap<String, AttributeValue>, serde_json::Error> {
     match serde_json::to_value(value) {
@@ -70,10 +79,15 @@ pub fn to_fields<A: Serialize>(value: A) -> Result<HashMap<String, AttributeValu
 
 /// Must be something that serializes from a JSON Object.
 /// ```
-/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(some_hashmap_macro!{
-///     "msg" => "Hello World",
-/// })?;
-/// let msg: HashMap<String, String> = from_fields(msg)?;
+/// use std::collections::HashMap;
+/// use std::iter::FromIterator;
+/// let mut object: HashMap<String, u32> = HashMap::from_iter(vec![
+///     (String::from("red"), 1),
+///     (String::from("green"), 2),
+///     (String::from("blue"), 3)
+/// ]);
+/// let msg: HashMap<String, rusoto_dynamodb::AttributeValue> = dynamodb_data::to_fields(object).expect("to_fields issue");
+/// let msg: HashMap<String, u32> = dynamodb_data::from_fields(msg).expect("from_fields failed");
 /// ```
 pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, AttributeValue>) -> Result<A, serde_json::Error> {
     let value: serde_json::Map<String, Value> = attribute_value_hashmap_to_json_map(value);
@@ -91,18 +105,22 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 /// 
 /// Example 1:
 /// ```
+/// use dynamodb_data::*;
+/// use std::collections::HashMap;
+/// 
 /// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-///     id: Uuid::new_v4(),
+///     id: ::uuid::Uuid::new_v4(),
 ///     name: "user name",
-///     counter: 0,
+///     counter: 0
 /// };
 /// ```
 /// 
 /// Example 2:
 /// ```
-/// let get_item_query = GetItemInput {
+/// use dynamodb_data::*;
+/// let get_item_query = rusoto_dynamodb::GetItemInput {
 ///     key: fields!{
-///         id: Uuid::new_v4()
+///         id: ::uuid::Uuid::new_v4()
 ///     },
 ///     ..Default::default()
 /// };
@@ -112,13 +130,13 @@ macro_rules! fields {
     ($($k:ident: $v:expr),* $(,)?) => {{
         use std::collections::hash_map::HashMap;
         use rusoto_dynamodb::AttributeValue;
-        use crate::utils::serde_dyn::*;
+        use $crate::*;
 
         let results: HashMap<String, AttributeValue> = {
             let mut m = HashMap::new();
             $(
                 m.insert(
-                    $k.to_owned(),
+                    stringify!($k).to_owned(),
                     to_attribute_value($v).expect("object! serialization failure")
                 );
             )*
@@ -129,8 +147,10 @@ macro_rules! fields {
 }
 
 
+
 /// ```
-/// PutItemInput {
+/// use dynamodb_data::*;
+/// rusoto_dynamodb::PutItemInput {
 ///     // I really love this aspect of DynamoDB:
 ///     expression_attribute_names: names!{
 ///         "#id" => "id"
@@ -297,3 +317,6 @@ fn attribute_value_hashmap_to_json_map(value: HashMap<String, AttributeValue>) -
         _ => panic!()
     }
 }
+
+
+
