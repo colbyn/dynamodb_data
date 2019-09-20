@@ -7,7 +7,7 @@ Serde based serialization support and misc utilities for working with Dynamodb v
 
 # API Example:
 
-```
+```rust
 use dynamodb_data::*;
 use std::collections::HashMap;
 
