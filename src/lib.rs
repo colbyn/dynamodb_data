@@ -129,7 +129,7 @@ macro_rules! i_field_key {
 /// // Str keys are also supported
 /// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
 ///     "id": ::uuid::Uuid::new_v4(),
-///     // `name` is a DynamoDB reserved word ':'
+///     // `name` is a DynamoDB reserved word.
 ///     ":name": "user name",
 ///     "counter": 0,
 ///     // Others can still be identifiers though
