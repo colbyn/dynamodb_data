@@ -23,3 +23,7 @@ let get_item_query = rusoto_dynamodb::GetItemInput {
     ..Default::default()
 };
 ```
+
+# NOTE
+
+The fields macro syntax has changed from `fields!{a: b}` to `fields!{a => b}`.
