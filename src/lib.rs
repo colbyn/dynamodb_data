@@ -173,15 +173,15 @@ macro_rules! fields {
 /// ```
 /// use dynamodb_data::*;
 /// rusoto_dynamodb::PutItemInput {
-///     expression_attribute_names: names!{
+///     expression_attribute_names: Some(names!{
 ///         ":id" => "id"
-///     },
+///     }),
 ///     ..Default::default()
 /// };
 /// ```
 #[macro_export]
 macro_rules! names {
-    ($($k:expr => $v:expr),*) => {{
+    ($($k:expr => $v:expr),* $(,)?) => {{
         use std::collections::hash_map::HashMap;
 
         let results: HashMap<String, String> = {
@@ -191,7 +191,7 @@ macro_rules! names {
             )*
             m
         };
-        Some(results)
+        results
     }};
 }
 
