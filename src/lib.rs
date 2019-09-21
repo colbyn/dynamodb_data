@@ -99,6 +99,18 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 // EXTERNAL API - MACROS
 ///////////////////////////////////////////////////////////////////////////////
 
+/// Internal
+#[doc(hidden)]
+#[macro_export]
+macro_rules! i_field_key {
+    ($k:ident) => {
+        stringify!($k).to_owned()
+    };
+    ($k:expr) => {{
+        let value: String = $k.to_owned();
+        value
+    }};
+}
 
 /// Converts the given fields to `HashMap<String, AttributeValue>`, automatically
 /// serializing the keys to `AttributeValue` VIA `serde_json`.
@@ -112,6 +124,16 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 ///     id: ::uuid::Uuid::new_v4(),
 ///     name: "user name",
 ///     counter: 0
+/// };
+/// 
+/// // Str keys are also supported
+/// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
+///     "id": ::uuid::Uuid::new_v4(),
+///     // `name` is a DynamoDB reserved word ':'
+///     ":name": "user name",
+///     "counter": 0,
+///     // Others can still be identifiers though
+///     some_other_field: 0
 /// };
 /// ```
 /// 
@@ -127,7 +149,7 @@ pub fn from_fields<A: serde::de::DeserializeOwned>(value: HashMap<String, Attrib
 /// ```
 #[macro_export]
 macro_rules! fields {
-    ($($k:ident: $v:expr),* $(,)?) => {{
+    ($($k:tt: $v:expr),* $(,)?) => {{
         use std::collections::hash_map::HashMap;
         use rusoto_dynamodb::AttributeValue;
         use $crate::*;
@@ -136,7 +158,7 @@ macro_rules! fields {
             let mut m = HashMap::new();
             $(
                 m.insert(
-                    stringify!($k).to_owned(),
+                    i_field_key!($k),
                     to_attribute_value($v).expect("object! serialization failure")
                 );
             )*
@@ -151,9 +173,8 @@ macro_rules! fields {
 /// ```
 /// use dynamodb_data::*;
 /// rusoto_dynamodb::PutItemInput {
-///     // I really love this aspect of DynamoDB:
 ///     expression_attribute_names: names!{
-///         "#id" => "id"
+///         ":id" => "id"
 ///     },
 ///     ..Default::default()
 /// };
