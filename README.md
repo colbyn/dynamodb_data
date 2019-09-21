@@ -18,7 +18,7 @@ let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
 };
 let get_item_query = rusoto_dynamodb::GetItemInput {
     key: fields!{
-        id: ::uuid::Uuid::new_v4()
+        id => ::uuid::Uuid::new_v4()
     },
     ..Default::default()
 };
