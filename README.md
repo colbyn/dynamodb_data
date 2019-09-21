@@ -27,3 +27,9 @@ let get_item_query = rusoto_dynamodb::GetItemInput {
 # NOTE
 
 The fields macro syntax has changed from `fields!{a: b}` to `fields!{a => b}`.
+Since It looks better for common cases like:
+```rust
+fields!{
+	“:a” => ::some_module::fun(),
+}
+```
