@@ -7,13 +7,13 @@
 //! use std::collections::HashMap;
 //! 
 //! let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-//!     id: ::uuid::Uuid::new_v4(),
-//!     name: "user name",
-//!     counter: 0
+//!     id => ::uuid::Uuid::new_v4(),
+//!     name => "user name",
+//!     counter => 0
 //! };
 //! let get_item_query = rusoto_dynamodb::GetItemInput {
 //!     key: fields!{
-//!         id: ::uuid::Uuid::new_v4()
+//!         id => ::uuid::Uuid::new_v4()
 //!     },
 //!     ..Default::default()
 //! };
@@ -121,19 +121,19 @@ macro_rules! i_field_key {
 /// use std::collections::HashMap;
 /// 
 /// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-///     id: ::uuid::Uuid::new_v4(),
-///     name: "user name",
-///     counter: 0
+///     id => ::uuid::Uuid::new_v4(),
+///     name => "user name",
+///     counter => 0
 /// };
 /// 
 /// // Str keys are also supported
 /// let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-///     "id": ::uuid::Uuid::new_v4(),
+///     "id" => ::uuid::Uuid::new_v4(),
 ///     // `name` is a DynamoDB reserved word.
-///     ":name": "user name",
-///     "counter": 0,
+///     ":name" => "user name",
+///     "counter" => 0,
 ///     // Others can still be identifiers though
-///     some_other_field: 0
+///     some_other_field => 0
 /// };
 /// ```
 /// 
@@ -142,14 +142,14 @@ macro_rules! i_field_key {
 /// use dynamodb_data::*;
 /// let get_item_query = rusoto_dynamodb::GetItemInput {
 ///     key: fields!{
-///         id: ::uuid::Uuid::new_v4()
+///         id => ::uuid::Uuid::new_v4()
 ///     },
 ///     ..Default::default()
 /// };
 /// ```
 #[macro_export]
 macro_rules! fields {
-    ($($k:tt: $v:expr),* $(,)?) => {{
+    ($($k:tt => $v:expr),* $(,)?) => {{
         use std::collections::hash_map::HashMap;
         use rusoto_dynamodb::AttributeValue;
         use $crate::*;

@@ -12,9 +12,9 @@ use dynamodb_data::*;
 use std::collections::HashMap;
 
 let payload: HashMap<String, rusoto_dynamodb::AttributeValue> = fields!{
-    id: ::uuid::Uuid::new_v4(),
-    name: "user name",
-    counter: 0
+    id => ::uuid::Uuid::new_v4(),
+    name => "user name",
+    counter => 0
 };
 let get_item_query = rusoto_dynamodb::GetItemInput {
     key: fields!{
