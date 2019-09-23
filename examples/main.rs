@@ -38,7 +38,7 @@ fn get() {
             .sync()
             .ok()
             .and_then(|output| output.item)
-            .and_then(|output| dynamodb_data::from_fields::<serde_json::Value>(output).ok());
+            .and_then(|output| dynamodb_data::from_fields::<Account>(output).ok());
         println!("result [as account]: {:#?}", account);
     }
     
