@@ -24,12 +24,8 @@ let get_item_query = rusoto_dynamodb::GetItemInput {
 };
 ```
 
-# NOTE
+# WARNING:
+**As we all know and love, DynamoDB rejects empty strings in favor of null without any metadata as to what the original type is… As a workaround I’m experimenting with encoding emptying strings VIA the ASCII null character (unless anyone has a better idea).**
 
-The fields macro syntax has changed from `fields!{a: b}` to `fields!{a => b}`.
-Since It looks better for common cases like:
-```rust
-fields!{
-	“:a” => ::some_module::fun(),
-}
-```
+This should presumably be more robust than using the [suggested idea here](https://stackoverflow.com/a/31174149). I haven’t read about this anywhere so perhaps I’m the first to use such a workaround. If the null encoding causes issues I can add a feature to disable the default behavior. 
+

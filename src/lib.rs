@@ -226,9 +226,18 @@ fn json_to_attribute_value(value: Value) -> AttributeValue {
                 ..Default::default()
             }
         },
-        Value::String(x) => AttributeValue {
-            s: Some(x),
-            ..Default::default()
+        Value::String(x) => {
+            if x.is_empty() {
+                AttributeValue {
+                    s: Some(String::from("\0")),
+                    ..Default::default()
+                }
+            } else {
+                AttributeValue {
+                    s: Some(x),
+                    ..Default::default()
+                }
+            }
         },
         Value::Number(x) => AttributeValue {
             n: Some(format!("{}", x)),
@@ -249,17 +258,17 @@ fn attribute_value_to_json(value: AttributeValue) -> Value {
     use std::iter::FromIterator;
 
     if value.b.is_some() {
-        match String::from_utf8(value.b.unwrap().to_vec()) {
+        match String::from_utf8(value.b.expect("dynamodb sdk error").to_vec()) {
             Ok(x) => Value::String(x),
             _ => panic!()
         }
     }
     else if value.bool.is_some() {
-        Value::Bool(value.bool.unwrap())
+        Value::Bool(value.bool.expect("dynamodb sdk error"))
     }
     else if value.bs.is_some() {
         let xs = value.bs
-            .unwrap()
+            .expect("dynamodb sdk error")
             .into_iter()
             .map(|x| {
                 match String::from_utf8(x.to_vec()) {
@@ -272,7 +281,7 @@ fn attribute_value_to_json(value: AttributeValue) -> Value {
     }
     else if value.l.is_some() {
         let xs: Vec<Value> = value.l
-            .unwrap()
+            .expect("dynamodb sdk error")
             .into_iter()
             .map(|x| attribute_value_to_json(x))
             .collect();
@@ -280,7 +289,7 @@ fn attribute_value_to_json(value: AttributeValue) -> Value {
     }
     else if value.m.is_some() {
         let xs: Vec<(String, Value)> = value.m
-            .unwrap()
+            .expect("dynamodb sdk error")
             .into_iter()
             .map(|(k, v)| (k, attribute_value_to_json(v)))
             .collect();
@@ -288,25 +297,30 @@ fn attribute_value_to_json(value: AttributeValue) -> Value {
         Value::Object(xs)
     }
     else if value.n.is_some() {
-        serde_json::from_str(value.n.unwrap().as_str()).unwrap()
+        serde_json::from_str(value.n.expect("dynamodb sdk error").as_str()).expect("dynamodb sdk error")
     }
     else if value.ns.is_some() {
         let xs: Vec<Value> = value.ns
-            .unwrap()
+            .expect("dynamodb sdk error")
             .into_iter()
-            .map(|x| serde_json::from_str(x.as_str()).unwrap())
+            .map(|x| serde_json::from_str(x.as_str()).expect("dynamodb sdk error"))
             .collect();
         Value::Array(xs)
+    }
+    else if value.s.is_some() {
+        let text = value.s.expect("dynamodb sdk error");
+        if text == String::from("\0") {
+            Value::String(String::new())
+        } else {
+            Value::String(text)
+        }
     }
     else if value.null.is_some() {
         Value::Null
     }
-    else if value.s.is_some() {
-        Value::String(value.s.unwrap())
-    }
     else if value.ss.is_some() {
         let xs: Vec<Value> = value.ns
-            .unwrap()
+            .expect("dynamodb sdk error")
             .into_iter()
             .map(|x| Value::String(x))
             .collect();
@@ -322,7 +336,7 @@ fn attribute_value_to_json(value: AttributeValue) -> Value {
 ///////////////////////////////////////////////////////////////////////////////
 
 fn json_to_attribute_value_hashmap(value: Value) -> HashMap<String, AttributeValue> {
-    json_to_attribute_value(value).m.unwrap()
+    json_to_attribute_value(value).m.expect("dynamodb sdk error")
 }
 
 fn attribute_value_hashmap_to_json_map(value: HashMap<String, AttributeValue>) -> serde_json::Map<String, Value> {
