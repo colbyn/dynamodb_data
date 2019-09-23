@@ -27,5 +27,5 @@ let get_item_query = rusoto_dynamodb::GetItemInput {
 # WARNING:
 **As we all know and love, DynamoDB rejects empty strings in favor of null without any metadata as to what the original type is… As a workaround I’m experimenting with encoding emptying strings VIA the ASCII null character (unless anyone has a better idea).**
 
-This should presumably be more robust than using the [suggested idea here](https://stackoverflow.com/a/31174149). I haven’t read about this anywhere so perhaps I’m the first to use such a workaround. If the null encoding causes issues I can add a feature to disable the default behavior. 
+This should presumably be more robust than using e.g. the [suggested idea here](https://stackoverflow.com/a/31174149). I haven’t read about this anywhere so perhaps I’m the first to use such a workaround. If the null encoding causes issues I can add a feature to disable the default behavior. 
 
